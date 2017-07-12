@@ -40,6 +40,14 @@ func main() {
 	// number of files modified
 	num_changes := 0
 
+	// txt which contain a list of 'target' in the modified xml
+	f, err := os.Create("./domain-list.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+
 	// iterate through *.xml
 	for ind, file := range files {
 		fn := file.Name()
@@ -86,6 +94,13 @@ func main() {
 					log.Print(err)
 				} else {
 					num_changes++
+				}
+
+				for _, target := range r.Targets {
+					_, err := f.WriteString(target.Host + "\n")
+					if err != nil {
+						log.Fatal(err)
+					}
 				}
 			}
 		}
