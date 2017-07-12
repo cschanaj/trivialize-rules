@@ -41,7 +41,7 @@ func main() {
 	num_changes := 0
 
 	// iterate through *.xml
-	for _, file := range files {
+	for ind, file := range files {
 		fn := file.Name()
 		fp := filepath.Join(os.Args[1], fn)
 
@@ -88,6 +88,10 @@ func main() {
 					num_changes++
 				}
 			}
+		}
+
+		if ind % 250 == 0 {
+			log.Printf("Current progress: operated on %d files, %d of which modified", ind, num_changes)
 		}
 	}
 	log.Printf("Rewritten %d files", num_changes)
