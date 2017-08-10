@@ -61,7 +61,7 @@ func main() {
 		xml.Unmarshal(xml_ctx, &r)
 
 		// ignore default_off ruleset (optional yet prefered)
-		if len(r.Default_off) > 0 {
+		if len(r.Default_off) == 0 {
 			continue
 		}
 
@@ -122,8 +122,8 @@ func trivialize_func_1(xml_ctx []byte, r ruleset.Ruleset) []byte {
 	tto   := "https://" + target + "/"
 
 	if from == tfrom && to == tto {
-		re := regexp.MustCompile(regex_rules)
-		return re.ReplaceAllLiteral(xml_ctx, []byte(trivial_rule))
+		re := regexp.MustCompile(`\n[ \t]*` + regex_rules + `\s*?\n`)
+		return re.ReplaceAllLiteral(xml_ctx, []byte("\n\t" + trivial_rule + "\n"))
 	}
 	return xml_ctx
 }
@@ -207,8 +207,8 @@ func trivialize_func_2(xml_ctx []byte, r ruleset.Ruleset) []byte {
 
 	// rewrite `rule`
 	if true {
-		re := regexp.MustCompile(regex_rules)
-		m_xml = re.ReplaceAllLiteral(m_xml, []byte(trivial_rule))
+		re := regexp.MustCompile(`\n[ \t]*` + regex_rules + `\s*?\n`)
+		m_xml = re.ReplaceAllLiteral(m_xml, []byte("\n\t" + trivial_rule + "\n"))
 
 		if bytes.Compare(m_xml, xml_ctx) == 0 {
 			// unsuccessful rewrite
@@ -218,8 +218,8 @@ func trivialize_func_2(xml_ctx []byte, r ruleset.Ruleset) []byte {
 
 	// rewrite `target`
 	if true {
-		re := regexp.MustCompile(regex_targe)
-		m_xml = re.ReplaceAllLiteral(m_xml, []byte(trivial_target))
+		re := regexp.MustCompile(`\n[ \t]*` + regex_targe + `\s*?\n`)
+		m_xml = re.ReplaceAllLiteral(m_xml, []byte("\n\t" + trivial_target + "\n"))
 
 		if bytes.Compare(m_xml, xml_ctx) == 0 {
 			// unsuccessful rewrite
