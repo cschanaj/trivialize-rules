@@ -61,7 +61,7 @@ func main() {
 		xml.Unmarshal(xml_ctx, &r)
 
 		// ignore default_off ruleset (optional yet prefered)
-		if len(r.Default_off) == 0 {
+		if len(r.Default_off) != 0 {
 			continue
 		}
 
@@ -75,9 +75,9 @@ func main() {
 
 		// an array of func to apply on xml_content
 		trivialize_func := [1]func([]byte, ruleset.Ruleset) []byte {
-			trivialize_func_1,
+			// trivialize_func_1,
 			// trivialize_func_2,
-			// trivialize_func_3,
+			trivialize_func_3,
 		}
 
 		for _, tf := range trivialize_func {
@@ -240,8 +240,7 @@ func trivialize_func_2(xml_ctx []byte, r ruleset.Ruleset) []byte {
  * </ruleset>
  */
 func trivialize_func_3(xml_ctx []byte, r ruleset.Ruleset) []byte {
-	if len(r.Rules) != 1 {
-	// if len(r.Rules) != 1 || len(r.Targets) != 2 {
+	if len(r.Rules) != 1 || len(r.Targets) != 2 {
 		return xml_ctx
 	}
 
@@ -259,7 +258,7 @@ func trivialize_func_3(xml_ctx []byte, r ruleset.Ruleset) []byte {
 	}
 
 	// check `from`
-	rfrp := `^\^http://\((\?:)?([\w-]+\\.\|?)+\)\?`
+	rfrp := `^\^http://\(\((\?:)?([\w-]+\|?)+\)\\.\)\?`
 	rfrm := strings.Replace(regexp.QuoteMeta(target), `\`, `\\`, -1)
 	rfrs := `/$`
 
@@ -272,8 +271,8 @@ func trivialize_func_3(xml_ctx []byte, r ruleset.Ruleset) []byte {
 	foo := ``
 	trivial_target := ``
 
-	start := strings.Index(from, `(`) + 1
-	end   := strings.Index(from, `)`)
+	start := strings.Index(from, `(`) + 4
+	end   := strings.Index(from, `)`) - 3
 
 	if start >= end {
 		return xml_ctx
@@ -284,7 +283,6 @@ func trivialize_func_3(xml_ctx []byte, r ruleset.Ruleset) []byte {
 	}
 
 	bar := strings.Split(foo, "|")
-	bar = append(bar, "")
 	sort.Strings(bar)
 
 	if len(bar) == 0 {
@@ -292,7 +290,11 @@ func trivialize_func_3(xml_ctx []byte, r ruleset.Ruleset) []byte {
 	}
 
 	for _, prefix := range bar {
-		tmp := `<target host="` + prefix + target + `" />` + "\n\t"
+		if len(prefix) == 0 {
+			continue
+		}
+
+		tmp := `<target host="` + prefix + `.` + target + `" />` + "\n\t"
 		trivial_target += tmp
 	}
 
@@ -315,9 +317,8 @@ func trivialize_func_3(xml_ctx []byte, r ruleset.Ruleset) []byte {
 
 	// rewrite `target`
 	if true {
-		re := regexp.MustCompile(regex_targe)
-		m_xml = re.ReplaceAllLiteral(m_xml, []byte(trivial_target))
-		m_xml = []byte(strings.Replace(string(m_xml), trivial_target, "", 1))
+		re := regexp.MustCompile(`\n[ \t]*<target\s+host\s*=\s*"\*\.[^"]*"\s*/>\s*?\n`)
+		m_xml = re.ReplaceAllLiteral(m_xml, []byte("\n\t" + trivial_target + "\n"))
 
 		if bytes.Compare(m_xml, xml_ctx) == 0 {
 			// unsuccessful rewrite
