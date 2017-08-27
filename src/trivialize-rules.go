@@ -272,7 +272,7 @@ func trivialize_func_3(xml_ctx []byte, r ruleset.Ruleset) []byte {
 	trivial_target := ``
 
 	start := strings.Index(from, `(`) + 4
-	end   := strings.Index(from, `)`) - 3
+	end   := strings.Index(from, `)`)
 
 	if start >= end {
 		return xml_ctx
